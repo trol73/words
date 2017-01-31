@@ -1,0 +1,101 @@
+#ifnotdef __GRAPH_JPL__
+#define   __GRAPH_JPL__
+#defineblock begin
+
+/*----------------------------------------------------------------------------*\
+
+                            Tr Mobile Studio v 1.0
+                          Runtime libraries:  GRAPH.JPL
+
+                      Copyright (c) Trifonow O.A., 2004-2006
+                                 Version 1.0
+
+
+                        Библиотека графических функций
+
+   Поддерживаемые типы приложений:
+       J2ME (midlet)
+       J2SE (applet, application)
+       BLACKBERRY (cod, jar)
+
+   Определяет типы:
+       Image
+       Font
+
+
+\*----------------------------------------------------------------------------*/
+
+
+  #ifdef BLACKBERRY
+    #include "blackberry\graph.h"
+  #elseif J2ME
+    #include "j2me\graph.h"
+  #elseif J2SE
+      #include "j2se\graph.h"
+  #elseif WIN32
+    #include "win32\graph.h"
+  #else
+    #error "unknown target platform"
+  #endif
+
+ #defineblock end
+ #ifdef J2SE
+#func
+public final Image createImageFromJar(String name) {
+// создает изображение из jar-файла приложения
+  java.net.URL imgURL = getClass().getResource("/"+name);
+  java.awt.Toolkit tk = java.awt.Toolkit.getDefaultToolkit();
+  Image img = null;
+  try {
+    java.awt.MediaTracker m = new java.awt.MediaTracker(this);
+    img = tk.getImage(imgURL);
+    m.addImage(img, 0);
+    m.waitForAll();
+  } catch (Exception e) {
+ #ifdef DEBUG
+    System.out.println(">> FATAL ERROR! >> createImage() -> file not found.\n" + e.toString());
+ #endif
+  }
+  return img;
+}
+#end
+#func
+public static final Font createFontWithFace(int face, int style, int size) {
+// возвращает созданный шрифт
+//   face - вид шрифта  (один из FONT_FACE_SYSTEM, FONT_FACE_MONOSPACE, or FONT_FACE_PROPORTIONAL)
+//   style - стиль шрифта (FONT_STYLE_PLAIN, или комбинация FONT_STYLE_BOLD, FONT_STYLE_ITALIC, FONT_STYLE_UNDERLINED
+//   size - размер шрифта (оди нз FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, или FONT_SIZE_LARGE)
+  switch ( face ) {
+    case FONT_FACE_SYSTEM:
+      return new Font("Dialog", style, size);
+    case FONT_FACE_MONOSPACE:
+      return new Font("Monospaced", style, size);
+    case FONT_FACE_PROPORTIONAL:
+      return new Font("Serif", style, size);
+  }
+  return new Font("Serif", style, size);
+}
+#end
+#func
+public static final void drawStringAnchor(Graphics g, String str, int x, int y, int anchor) {
+// рисование строки с поддержкой якорей
+  java.awt.FontMetrics fontMetrics = g.getFontMetrics();
+
+  if ( (anchor & DRAW_ANCHOR_RIGHT) == DRAW_ANCHOR_RIGHT )
+    x -= fontMetrics.stringWidth(str);
+  else if ( (anchor & DRAW_ANCHOR_HCENTER) == DRAW_ANCHOR_HCENTER )
+    x -= fontMetrics.stringWidth(str)/2;
+
+  if ( (anchor & DRAW_ANCHOR_BOTTOM) == DRAW_ANCHOR_BOTTOM )
+    y -= fontMetrics.getHeight();
+  else if ( (anchor & DRAW_ANCHOR_VCENTER) == DRAW_ANCHOR_VCENTER )
+    y -= fontMetrics.getHeight()/2;
+  else if ( (anchor & DRAW_ANCHOR_BASELINE) == DRAW_ANCHOR_BASELINE )
+    y -= fontMetrics.getAscent() + fontMetrics.getLeading();
+
+  g.drawString(str, x, y);
+}
+#end
+ #endif
+#endif
+

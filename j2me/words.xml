@@ -1,0 +1,73 @@
+<Project
+  name = "Words"
+  outfile = "words"
+  caption = "Words"
+  device = "j2me"
+  rescompiler = "">
+
+
+  <!-- пути к файлам -->
+  <paths
+    sources = "//src"
+    resources = "//res"
+    backup = "//bak"
+    build = "//build"
+    preprocessed = "//build/preprocessed"
+    compiled = "//build/compiled"
+    preverifed = "//build/preverifed"
+    obfuscated = "//build/obfuscated"
+  />
+
+
+  <!-- настройки компилятора -->
+  <compiler
+    debuginfo = "false"
+    compress = "true"
+    obfuscation = "false"
+    optimization = "speed"
+  />
+
+
+  <!-- настройки манифеста -->
+  <manifest
+    icon = ""
+    vendor = "Trol"
+    version = "1.04"
+    build = "0"
+    description = ""
+    buildautoinc = "true">
+  </manifest>
+
+
+  <!-- список исходных файлов проекта -->
+  <sources>
+    "Words.jpp"
+  </sources>
+
+
+  <!-- список ресурсных файлов проекта -->
+  <resources>
+	   "words.bin"
+		"btns.png"
+		"pics.png"
+  </resources>
+
+  
+  <package>
+    <release name = "Default" device = "midp2">
+      DEVICE_DEFAULT
+    </release>
+
+    <release name = "176" device = "midp2">
+      DEVICE_176
+    </release>
+
+
+    <release name = "240" device = "midp2">
+      DEVICE_240
+    </release>
+  </package>
+
+
+
+</Project>

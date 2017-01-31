@@ -1,0 +1,62 @@
+#ifnotdef __STDLIB_JPL__
+#define   __STDLIB_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.0.                        //
+//                        Runtime libraries:  STDLIB.JPL                      //
+//                      Copyright (c) Trifonow O.A., 2005                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 8 types):                                        //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720                                      //
+//                                                                            //
+//    SonyEricsson  T610                                                      //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       S55                                                       //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//   Библиотека содержит типичные, наиболее часто используемые подпрограммы   //
+// для работы с меню, текстом, создания граффических эффектов, анимации и пр. //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+//-----------------------------------------------------------------------------
+//   void menuEventHandler(int first_item, int last_item)
+// Обработчик событий клавиатуры типичного графического меню
+//   first_item и last_item - номера первого и последнего элемента меню
+// использует следующие переменные:
+//     - menu_item       -> номер текущего пункта меню
+//     - prev_menu_item  -> номер последнего выбранного пункта меню
+#macro menuEventHandler(first_item, last_item)
+if (action_down() || action_right()) {          // вниз/вправо -> +
+  prev_menu_item = menu_item;
+  if (menu_item < last_item) menu_item ++;
+  else menu_item = first_item;
+  repaint();
+} else if (action_up() || action_left()) {      // вверх/влево -> -
+  prev_menu_item = menu_item;
+  if (menu_item > first_item) menu_item --;
+  else menu_item = last_item;
+  repaint();
+}
+#endmacro
+//-----------------------------------------------------------------------------
+#defineblock end
+#endif

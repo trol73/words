@@ -1,0 +1,263 @@
+#ifnotdef __MATH_JPL__
+#define   __MATH_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Studio v 1.0.                         //
+//                        Runtime libraries:  MATH.JPL                        //
+//                      Copyright (c) Trifonow O.A., 2005                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//  Эта библиотека использует 32 битные целочисленные переменный типа int     //
+//  для эмуляции дробных чисел с фиксированной точкой 16:16 -> real           //
+// (16 бит-целая часть и 16-дробная)                                          //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//----------------------------------------------------------------------------//
+// объявление вещественного типа
+#define real int
+
+// математические константы
+#define   MATH_PI          205887            // Число "Пи" = 3.14159
+#define   MATH_PI_OVER_2   0x0001921F
+#define   MATH_2PI         0x0006487E
+#define   MATH_E           178145            // Число "e"  = 2.71828
+//#define   MATH_HALF        (int)((int)(2) << 15)    // 1/2
+#define   MATH_HALF        ((1<<16)/2)         // 1/2
+
+
+//------------------------------------------------------------------------------
+// ПРЕОБРАЗОВАНИЯ
+
+//   int realToInt(real x)
+// Конвертирует дробное x число в целое, отбрасывая все знаки после запятой
+#macro realToInt(x)
+(int)(x >> 16)
+#endmacro
+
+//   real intToReal(int x)
+// Конвертирует целое число x в дробное
+#macro intToReal(x)
+(int)(x << 16)
+#endmacro
+
+//   String realToString(real x)
+// Конвертирует дробное число x в строку
+//#macro realToStr(x)
+//(     ""+((int)(x >> 16)+"."+(int) (x -  )      )
+//#endmacro
+//------------------------------------------------------------------------------
+// БАЗОВАЯ АРИФМЕТИКА
+
+//   real rMul(real x, real y)
+// Умножает два дробных числа    ->  x*y
+#macro rMul(x, y)
+((int) ((long)((long) x * (long) y) >> 16))
+#endmacro
+
+//   real rDiv(real x, real y)    ->  x/y
+// Делит два дробных числа
+#macro rDiv(x, y)
+((int) (((long)(((long) x) << 32) / y) >> 16))
+#endmacro
+
+//------------------------------------------------------------------------------
+// МАТЕМАТИЧЕСКИЕ ФУНКЦИИ
+//------------------------------------------------------------------------------
+//   real rSqr(real x)
+// Возвращает квадрат числа
+#macro rSqr(x)
+((int) ((long)((long) x * (long) x) >> 16))
+#endmacro
+
+#defineblock end
+#func
+public static final int rSqrt(int x) {
+// возвращает квадратный корень числа
+// если аргумент отрицателен, возвращает (-1)
+  int s = (x + 0x10000) >> 1;
+  for (int i = 0; i < 8; i++)  s = (s + rDiv(x, s)) >> 1;
+  return s;
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rRound(int x) {
+// возвращает ближайшее целое к числу x
+  if (x > 0) {      // x > 0
+    if ((x & 0x8000) != 0)   return (( (x+0x10000) >> 16) << 16);
+    else                     return (( (x) >> 16) << 16);
+  } else {          // x <= 0
+    int k;
+    x = -x;
+    if ((x & 0x8000) != 0)   k = (((x+0x10000)>>16)<<16);
+    else                     k = (((x)>>16)<<16);
+    return -k;
+  }
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rSin(int x) {
+// Вычисляет значения синуса для 0 <= x <= 2 PI
+
+// Если х лежит в диапазоне от -pi/4 до pi/4, то преобразований не требуется,
+// иначе необходимо перевести его в этот диапазон и учесть изменение знака
+  int sign = 1;
+  if ((x > MATH_PI_OVER_2) && (x <= MATH_PI)) {                    // (Pi/2 .. Pi]
+    x = MATH_PI - x;
+  } else if ((x > MATH_PI) && (x <= (MATH_PI + MATH_PI_OVER_2))) { // (Pi .. 3/4 Pi]
+    x = x - MATH_PI;
+    sign = -1;
+  } else if (x > (MATH_PI + MATH_PI_OVER_2)) {                     // (3/4 Pi..Pi]
+    x = (MATH_PI << 1) - x;
+    sign = -1;
+  }
+  int sqr = rSqr(x);
+  int result = (498);
+  result = rMul(result, sqr);
+  result -= (10882);
+  result = rMul(result, sqr);
+  result += (1<<16);
+  result = rMul(result, x);
+  return (sign * result);
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rCos(int x) {
+// Вычисляет значения косинуса для 0 <= x <= PI/2
+  int sign = 1;
+  if ((x > MATH_PI_OVER_2) && (x <= MATH_PI)) {
+    x = MATH_PI - x;
+    sign = -1;
+  } else if ((x > MATH_PI_OVER_2) && (x <= (MATH_PI + MATH_PI_OVER_2))) {
+    x = x - MATH_PI;
+    sign = -1;
+  } else if (x > (MATH_PI + MATH_PI_OVER_2)) {
+    x = (MATH_PI << 1) - x;
+  }
+  int sqr = rSqr(x);
+  int result = (2328);
+  result = rMul(result, sqr);
+  result -= (32551);
+  result = rMul(result, sqr);
+  result += (1 << 16);
+  return (result * sign);
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rTan(int x) {
+// Вычисляет значения тангенса для 0 <= x <= PI/4
+  int sqr = rSqr(x);
+  int result = (13323);
+  result = rMul(result, sqr);
+  result += (20810);
+  result = rMul(result, sqr);
+  result += (1 << 16);
+  result = rMul(result, x);
+  return result;
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rCtg(int x) {
+// Вычисляет значения котангенса для 0 <= x <= PI/4
+  return rDiv((1 << 16), rTan(x));
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rArcSin(int x) {
+// Вычисляет значения арксинуса для 0 <= x <= 1
+/*
+  int fRoot = rSqrt( (1<<16) - x);
+  int result = (-1228);
+  result = rMul(result, x);
+  result += (4866);
+  result = rMul(result, x);
+  result -= (13901);
+  result = rMul(result, x);
+  result += (102939);
+  result = MATH_PI_OVER_2 - (rMul(fRoot, result));
+  return result;
+*/
+  return (MATH_PI_OVER_2 - rArcCos(x));
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final int rArcCos(int x) {
+// Вычисляет значения арккосинуса для 0 <= x <= 1
+  int fRoot = rSqrt( (1<<16) - x);
+  int result = (-1228);
+  result = rMul(result, x);
+  result += (4866);
+  result = rMul(result, x);
+  result -= (13901);
+  result = rMul(result, x);
+  result += (102939);
+  result = rMul(fRoot, result);
+  return result;
+//-----------------------------------------------------------------------------
+}
+#end
+#var
+public static final int MATH_LN_SCALE[] = { 0, 45426, 90852, 136278, 181704, 227130, 272557, 317983, 363409, 408835, 454261, 499687, 545113, 590539, 635965, 681391, 726817 };
+#end
+#var
+public static final int MATH_LOG_2_ARR[] = { 26573, 14624, 7719, 3973, 2017, 1016, 510, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0, 0, 0 };
+#end
+#func
+public static final int rLn(int x) {
+// Вычисляет логорифм по оскованию 2 для х,   x >= 1
+  int shift = 0;
+  while (x > 1 << 17) {
+    shift++;
+    x >>= 1;
+  }
+  int g = 0;
+  int d = MATH_HALF;
+  for (int i = 1; i < 16; i++) {
+    if (x > ((1<<16) + d)) {
+      x = rDiv(x, ( (1<<16) + d));
+      g += MATH_LOG_2_ARR[i-1];   // log2arr[i-1] = log2(1+d);
+    }
+    d >>= 1;
+  }
+  return g + MATH_LN_SCALE[shift];
+}
+//-----------------------------------------------------------------------------
+#end
+#func
+public static final String realToStr(int x) {
+  int dec = (int)(x >> 16);
+  String result = "" + dec + ".";
+  real f = x - (int)(dec << 16);
+  real a = fixed(10000);
+  f = rMul(f, a);
+  dec = (int)(f >> 16);
+  result += dec;
+  return result;
+}
+#end
+#func
+public static final int trunc(int x) {
+// округляет число, отбрасывая знаки после десятичной запятой
+  int dec = realToInt(x);
+  return intToReal(dec);
+}
+#end
+
+#endif

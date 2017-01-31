@@ -1,0 +1,87 @@
+#ifnotdef __DEBUG_JPL__
+#define   __DEBUG_JPL__
+#defineblock begin
+
+/*----------------------------------------------------------------------------*\
+
+                            Tr Mobile Studio v 1.0
+                          Runtime libraries:  DEBUG.JPL
+
+                      Copyright (c) Trifonow O.A., 2004-2006
+                                 Version 1.0
+
+
+                   Библиотека отладочных подпрограмм и макросов
+
+   Поддерживаемые платформы:  J2ME, J2SE, BLACKBERRY
+
+
+
+\*----------------------------------------------------------------------------*/
+
+#define DEBUG_HOST   "localhost"
+#define DEBUG_PORT   8888
+
+
+#defineblock end
+
+#ifdef JAVA
+  #ifdef DEBUG_DEVICE
+//    #var
+public static String _debugOutputLines_;  // отладочная информация, выводимая в окно телефона
+//    #end
+  #endif // DEBUG_DEVICE
+
+
+
+
+  #ifdef DEBUG_SOCKET
+public static SocketConnection _debugSocketConnection_;
+public static OutputStream _debugSocketConnectionOutStream_;
+public static final void _debugSocketMessage(String msg) {
+  if ( _debugSocketConnectionOutStream_ == null )
+    return;
+#ifdef DEBUG_TRANSLIT_SOCKET
+#endif
+//  sleep(50);
+  try {
+    _debugSocketConnectionOutStream_ .write((msg + "\n").getBytes());
+  } catch ( Exception e) {
+    System.out.println("smsg() -> error: " + e);
+  }
+  sleep(50);
+}
+
+
+public static final void _debugInitSocketMessage() {
+  String url = DEBUG_HOST + ':' + DEBUG_PORT;
+  try {
+    _debugSocketConnection_ = (SocketConnection)Connector.open("socket://" + url);
+    _debugSocketConnectionOutStream_ = _debugSocketConnection_ .openOutputStream();
+  } catch ( Exception e ) {
+    System.out.println("smsg() init error -> " + e);
+    _debugSocketConnectionOutStream_ = null;
+  }
+}
+
+public static final void _debugDoneSocketMessage() {
+  try {
+    _debugSocketConnectionOutStream_ .close();
+    _debugSocketConnection_ .close();
+  } catch ( Exception e ) {
+    System.out.println("smsg() destroy error -> " + e);
+  }
+  _debugSocketConnectionOutStream_ = null;
+  _debugSocketConnection_ = null;
+}
+  #else // DEBUG_SOKET
+    #macro _debugSocketMessage(msg)
+    #endmacro
+    #macro _debugInitSocketMessage()
+    #endmacro
+    #macro _debugDoneSocketMessage()
+    #endmacro
+  #endif // DEBUG_SOKET
+  
+#endif // JAVA
+#endif // __DEBUG_JPL__

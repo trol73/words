@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<project name="words-j2me" default="build" basedir=".">
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="temp.dir" value="${basedir}/build" />
+	<property name="package.name" value="words" />
+	<property name="ppc.dir" value="${temp.dir}/preprocessed" />
+	<property name="compile.dir" value="${temp.dir}/compile" />
+	<property name="compile.jar" value="${temp.dir}/compile.jar" />
+	<property name="obfuscated.jar" value="${temp.dir}/obfuscated.jar" />
+	<property name="obfuscated.dir" value="${temp.dir}/obfuscated" />
+	<property name="preverify.dir" value="${temp.dir}/preverify" />
+	<property name="distr.dir" value="${basedir}/dist" />
+	<property name="ppc.path" value="${basedir}/trms/ppc" />
+	
+	<property name="midlet.jar.file" value="${distr.dir}/words.jar" />
+	<property name="midlet.jad.file" value="${distr.dir}/words.jad" />
+
+	<property file="../words.properties" />
+		
+	<property name="wtk.midpapi" value="${wtk.home}/lib/midpapi20.jar:${wtk.home}/lib/cldcapi10.jar" />
+	
+	<taskdef resource="antenna.properties" classpath="${antenna.path}"/>
+	
+	
+	
+	<target name="prepare">
+		<delete dir="${temp.dir}" />
+		<mkdir dir="${temp.dir}" />
+		<delete dir="${distr.dir}" />
+		<mkdir dir="${distr.dir}" />
+	</target>
+	
+	<target name="preprocess" depends="prepare">
+		<mkdir dir="${ppc.dir}//${package.name}"/>
+		<exec executable="${ppc.path}">
+			<arg value="${src.dir}/Words.jpp"/>
+			<arg value="${ppc.dir}/${package.name}/Words.java"/>
+			<arg value="-Itrms/include"/>
+			<arg value="-Ltrms/lib"/>
+			<arg value="-DJAVA"/>
+			<arg value="-DJ2ME"/>
+			<arg value="-DMIDP2"/>
+		</exec>
+	</target>
+	
+	<target name="compile" depends="preprocess">
+		<mkdir dir="${compile.dir}"/>
+		
+		<wtkbuild debug="false" srcdir="${ppc.dir}" destdir="${compile.dir}" encoding="utf-8"/>
+		
+		<jar destfile="${compile.jar}">
+			<fileset dir="${compile.dir}">
+				<include name="**/*" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target name="obfuscate" depends="compile">
+		<taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
+
+		<proguard>
+			-injars  ${compile.jar}
+			-outjars ${obfuscated.jar}
+			-libraryjars ${wtk.home}/lib/midpapi20.jar
+			-libraryjars ${wtk.home}/lib/cldcapi10.jar
+
+			-verbose
+
+			-overloadaggressively
+
+			-defaultpackage  '${package.name}'
+
+			-allowaccessmodification
+
+			-keep public class * extends javax.microedition.midlet.MIDlet
+
+			-printseeds
+
+			-keepclasseswithmembernames class * {
+				native &lt;methods&gt;;
+			}
+		</proguard>
+		
+		<unjar src="${obfuscated.jar}" dest="${obfuscated.dir}"/>
+		
+		<wtkpreverify srcdir="${obfuscated.dir}" destdir="${preverify.dir}"/>
+		
+<!--		
+		<wtkpreverify srcdir="${compile.dir}" destdir="${preverify.dir}"/>
+-->
+	</target>
+	
+	
+	<target name="build" depends="obfuscate">
+		<copy file="${basedir}/words.jad" tofile="${midlet.jad.file}"/>
+		<wtkpackage jarfile="${midlet.jar.file}" jadfile="${midlet.jad.file}" 
+			profile="MIDP-2.0" preverify="false" obfuscate="false">
+			
+			<fileset dir="${preverify.dir}"/>
+			<fileset dir="${basedir}/res">
+				<include name="pics.png" />
+				<include name="btns.png" />
+				<include name="f176.bin" />
+				<include name="fb176.bin" />
+				<include name="words.bin" />
+			</fileset>
+			
+		</wtkpackage>
+		
+	</target>
+	
+	<target name="run">
+<!--		
+		<wtkrun jadfile="${midlet.jad.file}" device="DefaultColorPhone"/>
+-->
+		<wtkrun jadfile="${midlet.jad.file}" device="QwertyDevice"/>
+	</target>
+
+
+
+
+</project>

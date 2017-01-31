@@ -1,0 +1,12 @@
+META-INF/MANIFEST.MF
+
+words/a.class
+words/b.class
+words/c.class
+words/Words.class
+
+btns.png
+pics.png
+
+f[%FONT_SIZE%].bin
+fb[%FONT_SIZE%].bin

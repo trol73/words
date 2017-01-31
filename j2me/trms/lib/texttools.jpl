@@ -1,0 +1,257 @@
+#ifnotdef __TEXTTOOLS_JPL__
+#define   __TEXTTOOLS_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                                                                            //
+//                       Tr Java Mobile Builder v 1.5.                        //
+//                      Runtime libraries:  TEXTTOOLS.JPL                     //
+//                      Copyright (c) Trifonow O.A., 2006                     //
+//                                Version 1.02                                //
+//                                                                            //
+//  Набор подпрограмм для работы с текстами и строками. Содержит подпрограммы //
+//  для форматирования текстов, разделения слов на слоги и пр.                //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//----------------------------------------------------------------------------//
+#defineblock end
+#var
+// гласные буквы русского языка, отсортированные по частоте употребления
+const String txttStrVowelRus = "оеаиуяйюэОАИЯЭЕУЮЙ";
+#end
+#var
+// гласные буквы английского языка, отсортированные по частоте употребления
+const String txttStrVowelLat = "eoaiuAOIEUJj";
+#end
+#var
+// гласные буквы, отсортированные по частоте употребления
+const String txttStrVowel = txttStrVowelRus + txttStrVowelLat;
+#end
+#var
+// согласные буквы русского языка, отсортированные по частоте употребления
+const String txttStrConsonantRus = "тнслврмкдпгбзчжшхцщНВПфСКМФДTБЛГРЧЗХШЖЦЩ";
+#end
+#var
+// согласные буквы английского языка, отсортированные по частоте употребления
+const String txttStrConsonantLat = "trsnlcdTmhSRNbpyfCFPgDMwvLXkBWKGHxVzqYZQ";
+#end
+#var
+// согласные буквы, отсортированные по частоте употребления
+const String txttStrConsonant = txttStrConsonantRus + txttStrConsonantLat;
+#end
+#var
+// особые символы русского алфавита для разложения слов на слоги
+const String txttStrSpecial = "ьыъЫЬЪ";
+#end
+#defineblock begin
+  // типы букв
+  #define TXTT_CH_UNKNOWN        0
+  #define TXTT_CH_CONSONANT      1
+  #define TXTT_CH_VOWEL          2
+  #define TXTT_CH_SPECIAL        3
+#defineblock end
+#func
+func String stringSyllableAnalyse(String aStr, char aDelim) {
+// раскладывает полученную строку на слоги, вставляя разделители aDelim
+  StringBuffer result = new StringBuffer();
+  int len = aStr.length();
+  if ( len == 0)
+    return result.toString();
+  // массив типов символов
+  byte[] charTypes = new byte[len];
+  for (int i = 0; i < len; i++) {
+    char ch = aStr.charAt(i);
+    if ( __void__macro__(txttStrConsonant).indexOf(ch) >= 0 )
+      charTypes[i] = TXTT_CH_CONSONANT;
+    else if ( __void__macro__(txttStrVowel).indexOf(ch) >= 0 )
+      charTypes[i] = TXTT_CH_VOWEL;
+    else if ( __void__macro__(txttStrSpecial).indexOf(ch) >= 0 )
+      charTypes[i] = TXTT_CH_SPECIAL;
+#ifdef CUSTOM_ZERRO
+    else
+      charTypes[i] = TXTT_CH_UNKNOWN;
+#endif
+  }
+
+  // собственно расстановка переносов
+  int charInWord = 0;    // номер буквы в текущем слове
+  int lock = 0;          // счетчик блокировок
+
+  for (int sourcePos = 0; sourcePos < len; sourcePos++) {
+    result.append(aStr.charAt(sourcePos));
+
+    // если это последний слог, то его уже не делим
+    if ( sourcePos >= len-2)
+      continue;
+    // если это не буква, то после текущего символа можно ожидать новое слово
+    if ( charTypes[sourcePos] == TXTT_CH_UNKNOWN ) {
+      charInWord = 0;
+      continue;
+    } else
+      charInWord++;      // иначе, мы сейчас читаем слово
+
+    // если слог был закончен, и это первый символ следующего или разделитель, то продолжаем
+    if ( lock != 0 ) {
+      lock--;
+      continue;
+    }
+
+    // если сейчас читается не слово или это первый символ слова, то продолжаем
+    if ( charInWord <= 1 )
+      continue;
+
+    bool isSlogMore = false;  // флаг того, что текущее слово содержит еще хотя бы один слог
+    for (int i = sourcePos+1; i < len-1; i++) {
+      if ( charTypes[i] == TXTT_CH_UNKNOWN )
+        break;
+      if ( (charTypes[i] == TXTT_CH_VOWEL) && ( (charTypes[i+1] != TXTT_CH_UNKNOWN) || (i != sourcePos+1)) ) {
+        isSlogMore = true;
+        break;
+      }
+    };
+    if ( !isSlogMore )
+      continue;
+
+    if ( ( (charTypes[sourcePos] == TXTT_CH_CONSONANT) && (charTypes[sourcePos-1] == TXTT_CH_VOWEL) && (charTypes[sourcePos+1] == TXTT_CH_CONSONANT) && (charTypes[sourcePos+2] != TXTT_CH_SPECIAL) )
+      || ( (charTypes[sourcePos] == TXTT_CH_VOWEL) && (charTypes[sourcePos-1] == TXTT_CH_CONSONANT) && (charTypes[sourcePos+1] == TXTT_CH_CONSONANT) && (charTypes[sourcePos+2] == TXTT_CH_VOWEL) )
+      || ( (charTypes[sourcePos] == TXTT_CH_VOWEL) && (charTypes[sourcePos-1] == TXTT_CH_CONSONANT) && (charTypes[sourcePos+1] == TXTT_CH_VOWEL) && (charTypes[sourcePos+2] == TXTT_CH_CONSONANT) )
+      || ( charTypes[sourcePos] == TXTT_CH_SPECIAL ) ) {
+        result.append(aDelim);
+        lock = 1;
+    };
+    
+  }; // for
+  
+  charTypes = null;
+  return result.toString();
+}
+#end
+#func
+proc formatText(String aStr, Vector aResult, int aWidth, String aDelims, Font aFont, int aFontWidthCorrect) {
+// ----------------------
+// функция выполняет перенос текстовой строки, разделяя ее на подстроки так, чтобы
+// их графическая ширина не превышала заданной.
+// Аргументы:
+//   aStr     - исходная строка
+//   aResult  - набор строк, в который будет добавлено разбиение
+//   aWidth   - максимально допустимая графическая ширина подстроки
+//   aDelims  - строка, содержащая набор разделителей, на которых можно делать перенос
+//   aFont    - шрифт для вычисления графической ширины подстрок
+//   aFontWidthCorrect - поправка к ширине символа, которая будет добавляться для каждого символа
+// ----------------------
+  int len = aStr.length()-1;
+  int lastDelimIndex = 0;    // на этой позиции строку можно разделить
+  int startIndex = 0;        // начало текущей подстроки
+  int endIndex = 0;          // конец текущей подстроки
+  String strSpaces = "";
+  while (endIndex < len) {
+    endIndex++;
+    // графическая ширина строки
+    int stringWidth = aFont.stringWidth(aStr.substring(startIndex, endIndex+1)) + (endIndex-startIndex+1-strSpaces.length())*aFontWidthCorrect - aFont.stringWidth(strSpaces);
+//msg("+", aStr.substring(startIndex, endIndex+1), stringWidth);
+    // если строка умещается
+    if ( stringWidth < aWidth ) {
+      if ( (aDelims == null) || (aDelims == "") ) {
+        lastDelimIndex = endIndex;
+      } else if ( aDelims.indexOf(aStr.charAt(endIndex)) == 0 ) {
+        lastDelimIndex = endIndex;
+        strSpaces += aStr.charAt(endIndex);
+      } else if ( aDelims.indexOf(aStr.charAt(endIndex)) > 0 ) {
+        lastDelimIndex = endIndex;
+      }
+    } else {
+      // если строку пора делить, и позиция для деления найдена, делим по ней
+      strSpaces = "";
+      if ( lastDelimIndex > startIndex ) {
+        endIndex = lastDelimIndex;
+        aResult.addElement(aStr.substring(startIndex, endIndex));  // !!!!
+        if ( (aDelims == null) || (aDelims == "") )
+          endIndex--;
+      } else {
+        endIndex--;
+        aResult.addElement(aStr.substring(startIndex, endIndex));
+      }
+      startIndex = endIndex+1;
+    }
+  } // for
+  // выделяем последнюю строку если надо
+  if (startIndex <= len) {
+    aResult.addElement(aStr.substring(startIndex, len+1));
+  }
+}
+#end
+#func
+proc formatText(String aStr, Vector aResult, int aWidth, String aDelims) {
+// ----------------------
+// функция выполняет перенос текстовой строки, разделяя ее на подстроки так, чтобы
+// их графическая ширина не превышала заданной.
+// Аргументы:
+//   aStr     - исходная строка
+//   aResult  - набор строк, в который будет добавлено разбиение
+//   aWidth   - максимально допустимая графическая ширина подстроки
+//   aDelims  - строка, содержащая набор разделителей, на которых можно делать перенос
+// Исполизует функции:
+//  int getCustomFontStringWidth(String aStr)
+//  для определения графической длины строки
+// ----------------------
+  int len = aStr.length()-1;
+  int lastDelimIndex = 0;    // на этой позиции строку можно разделить
+  int startIndex = 0;        // начало текущей подстроки
+  int endIndex = 0;          // конец текущей подстроки
+  String strSpaces = "";
+  while (endIndex < len) {
+    endIndex++;
+    // графическая ширина строки
+    int stringWidth = getCustomFontStringWidth(aStr.substring(startIndex, endIndex+1)) - getCustomFontStringWidth(strSpaces);
+    // если строка умещается
+    if ( stringWidth < aWidth ) {
+      if ( (aDelims == null) || (aDelims == "") ) {
+        lastDelimIndex = endIndex;
+      } else if ( aDelims.indexOf(aStr.charAt(endIndex)) == 0 ) {
+        lastDelimIndex = endIndex;
+        strSpaces += aStr.charAt(endIndex);
+      } else if ( aDelims.indexOf(aStr.charAt(endIndex)) > 0 ) {
+        lastDelimIndex = endIndex;
+      }
+    } else {
+      // если строку пора делить, и позиция для деления найдена, делим по ней
+      strSpaces = "";
+      if ( lastDelimIndex > startIndex ) {
+        endIndex = lastDelimIndex;
+        aResult.addElement(aStr.substring(startIndex, endIndex));  // !!!!
+        if ( (aDelims == null) || (aDelims == "") )
+          endIndex--;
+      } else {
+        endIndex--;
+        aResult.addElement(aStr.substring(startIndex, endIndex));
+      }
+      startIndex = endIndex+1;
+    }
+  } // for
+  // выделяем последнюю строку если надо
+  if (startIndex <= len) {
+    aResult.addElement(aStr.substring(startIndex, len+1));
+  }
+}
+#end
+#func
+func String deleteCharFromString(String aStr, String aChars) {
+// ----------------------
+// возвращает строку, из которой удалены все указанные символы
+// Аргументы:
+//   aStr     - исходная строка
+//   aChars   - символы, которые надо удалить
+// Возвраща ет:
+//   строку aStr с удаленными символами строки aChars
+// ----------------------
+  int len = aStr.length();
+  StringBuffer result = new StringBuffer();
+  for (int i = 0; i < len; i++) {
+    char ch = aStr.charAt(i);
+    if ( aChars.indexOf(ch) < 0 )
+      result.append(ch);
+  }
+  return result.toString();
+}
+#end
+#endif  // __TEXTTOOLS_JPL__

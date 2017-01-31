@@ -1,0 +1,61 @@
+#ifnotdef __SMS_JPL__
+#define   __SMS_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.5                         //
+//                        Runtime libraries:  SMS.JPL                         //
+//                     Copyright (c) Trifonow O.A., 2005                      //
+//                                Version 1.01                                //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//                                                                            //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 12 types):                                       //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720, C650                                //
+//                                                                            //
+//    SonyEricsson  T610                                                      //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       55                                                        //
+//                                                                            //
+//    Siemens       65                                                        //
+//                                                                            //
+//    Abstract MIDP 1.0 device                                                //
+//                                                                            //
+//    Abstract MIDP 2.0 device                                                //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------------
+#defineblock end
+#func
+func boolean smsSend(String phone, String text) {
+// отправляет текстовое пороткое сообщение text на номер phone
+#ifdef JSR_120
+  try {
+    MessageConnection conn = (MessageConnection) Connector.open ("sms://"+phone);
+    TextMessage txt = (TextMessage) conn.newMessage(MessageConnection.TEXT_MESSAGE);
+    txt.setPayloadText(text);
+    conn.send(txt);
+    return true;
+  } catch (Exception e) {
+    return false;
+  }
+#elseif SIEMENS_55
+  return (sms.send(phone, text) > 0);
+#else
+  return false;
+#endif
+//------------------------------------------------------------------------------
+}
+#end
+
+#endif
+
+

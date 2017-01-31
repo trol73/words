@@ -1,0 +1,308 @@
+#ifnotdef __HTTP_JPL__
+#define   __HTTP_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.0.                        //
+//                        Runtime libraries:  HTTP.JPL                        //
+//                      Copyright (c) Trifonow O.A., 2005                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 8 types):                                        //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720                                      //
+//                                                                            //
+//    SonyEricsson  T610                                                      //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       S55                                                       //
+//                                                                            //
+//----------------------------------------------------------------------------//
+#defineblock end
+#func
+proc httpPost(String url, String data) throws IOException {
+  HttpConnection c = null;
+  InputStream is = null;
+  OutputStream os = null;
+  byte[] data_buffer;
+  try
+  {
+  msg("connecting...");
+    c = (HttpConnection)Connector.open(url, Connector.READ_WRITE);
+  msg("connecting...done");
+  msg("set header. Metod = "+HttpConnection.POST);
+    c.setRequestMethod(HttpConnection.POST);
+    c.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+    c.setRequestProperty("User-Agent", "Profile/MIDP-1.0 Configuration/CLDC-1.0" );
+    c.setRequestProperty("Content-Length", ""+data.length());
+  msg("create stream");
+    os = c.openOutputStream();
+
+//    c.setRequestProperty("Connection", "close");
+
+  msg("write");
+    os.write(data.getBytes());
+msg("getting response..");
+    // получение кода ответа должно открыть соединение,
+    // послать запрос, и прочитать заголовок ответа HTTP.
+    // Заголовок будет сохранен во время запрса.
+    int rc = c.getResponseCode();
+    msg("response code = ", rc);
+    
+  msg("read");
+    
+    
+    
+  is = c.openInputStream();
+      String type = c.getType();
+      int data_count = (int)c.getLength();
+      msg("HTTP -> type=", type);
+      msg("HTTP -> length=", data_count);
+/*
+   if (data_count > 0) {
+        data_buffer = new byte[data_count];
+        int actual = 0;
+        int bytesread = 0;
+        while ((bytesread != data_count) && (actual != -1)) {
+          actual = is.read(data_buffer, bytesread, data_count - bytesread);
+          bytesread += actual;
+        }
+     for (int i = 0; i < data_count; i++)
+       System.out.print(""+data_buffer[i]);
+
+   }
+*/
+  data_buffer = new byte[data_count];
+  is.read(data_buffer, 0, data_count);
+  for (int i = 0; i < data_count; i++)
+    System.out.print(""+(char)(data_buffer[i]));
+
+
+
+  msg("");
+    is.close();
+    os.close();
+  msg("done");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  msg("connecting...");
+    c = (HttpConnection)Connector.open(url, Connector.READ_WRITE);
+  msg("connecting...done");
+  msg("set header. Metod = "+HttpConnection.POST);
+
+    c.setRequestMethod(HttpConnection.POST);
+    c.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+    c.setRequestProperty("User-Agent", "Profile/MIDP-1.0 Configuration/CLDC-1.0" );
+    c.setRequestProperty("Content-Length", ""+data.length());
+  msg("create stream");
+*/
+    os = c.openOutputStream();
+
+//    c.setRequestProperty("Connection", "close");
+
+  msg("write");
+    os.write(data.getBytes());
+msg("getting response..");
+    // получение кода ответа должно открыть соединение,
+    // послать запрос, и прочитать заголовок ответа HTTP.
+    // Заголовок будет сохранен во время запрса.
+    rc = c.getResponseCode();
+    msg("response code = ", rc);
+
+  msg("read");
+
+
+
+  is = c.openInputStream();
+      type = c.getType();
+      data_count = (int)c.getLength();
+      msg("HTTP -> type=", type);
+      msg("HTTP -> length=", data_count);
+      type = null;
+/*
+   if (data_count > 0) {
+        data_buffer = new byte[data_count];
+        int actual = 0;
+        int bytesread = 0;
+        while ((bytesread != data_count) && (actual != -1)) {
+          actual = is.read(data_buffer, bytesread, data_count - bytesread);
+          bytesread += actual;
+        }
+     for (int i = 0; i < data_count; i++)
+       System.out.print(""+data_buffer[i]);
+
+   }
+*/
+  data_buffer = new byte[data_count];
+  is.read(data_buffer, 0, data_count);
+  for (int i = 0; i < data_count; i++)
+    System.out.print(""+(char)(data_buffer[i]));
+
+
+
+  msg("");
+    is.close();
+    os.close();
+  msg("done");
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  msg("connecting...");
+    c = (HttpConnection)Connector.open(url, Connector.READ_WRITE);
+  msg("connecting...done");
+  msg("set header. Metod = "+HttpConnection.POST);
+    c.setRequestMethod(HttpConnection.POST);
+    c.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+    c.setRequestProperty("User-Agent", "Profile/MIDP-1.0 Configuration/CLDC-1.0" );
+    c.setRequestProperty("Content-Length", ""+data.length());
+  msg("create stream");
+    os = c.openOutputStream();
+
+//    c.setRequestProperty("Connection", "close");
+
+  msg("write");
+    os.write(data.getBytes());
+msg("getting response..");
+    // получение кода ответа должно открыть соединение,
+    // послать запрос, и прочитать заголовок ответа HTTP.
+    // Заголовок будет сохранен во время запрса.
+    rc = c.getResponseCode();
+    msg("response code = ", rc);
+
+  msg("read");
+
+
+
+  is = c.openInputStream();
+      type = c.getType();
+      data_count = (int)c.getLength();
+      msg("HTTP -> type=", type);
+      msg("HTTP -> length=", data_count);
+      type = null;
+/*
+   if (data_count > 0) {
+        data_buffer = new byte[data_count];
+        int actual = 0;
+        int bytesread = 0;
+        while ((bytesread != data_count) && (actual != -1)) {
+          actual = is.read(data_buffer, bytesread, data_count - bytesread);
+          bytesread += actual;
+        }
+     for (int i = 0; i < data_count; i++)
+       System.out.print(""+data_buffer[i]);
+
+   }
+
+  data_count = 15-4;
+  data_buffer = new byte[data_count];
+  is.read(data_buffer, 0, data_count);
+  for (int i = 0; i < data_count; i++)
+    System.out.print(""+(char)(data_buffer[i]));
+
+
+
+  msg("");
+    is.close();
+    os.close();
+  msg("done");
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+    c.close();
+  } catch( IOException e ) {}
+}
+//----------------------------------------------------------------------------
+#end
+#func
+proc httpGet(String url) {
+  HttpConnection c = null;
+  InputStream is = null;
+  int rc;
+  try {
+    msg("HTTP -> open url...");
+    msg("URL = ", url);
+    display.setCurrent(frmSending);
+    try {
+      c = (HttpConnection)Connector.open(url);
+    } catch (SecurityException e) {
+      return;
+    }
+    msg("HTTP -> open url... complite");
+    // начинаем получать данные сервера...
+    if (c == null) {
+      return;
+    }
+    rc = c.getResponseCode();       // получить код ответа
+    msg("HTTP -> ResponseCode =", rc, HttpConnection.HTTP_OK);
+    int len = (int)c.getLength();
+    is = c.openInputStream();
+    if (c != null)   c.close();
+    if (is != null)  is.close();
+    sleep(1000);
+  } catch (IOException e) {
+  } finally {
+    is = null;
+    c = null;
+    display.setCurrent(mainFrame);
+  } // finaly
+
+
+}
+#func
+
+
+#end
+#endif

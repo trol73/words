@@ -1,0 +1,55 @@
+#ifnotdef __CAMERA_JPL__
+#define   __CAMERA_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.5.                        //
+//                         Runtime libraries: CAMEA.JPL                       //
+//                      Copyright (c) Trifonow O.A., 2005                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//                 MMAPI 1.1 (JSR 135) camera support unit                    //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+#defineblock end
+#func
+public static final Image cameraGetSnapshotImage() {
+  Player p;
+  VideoControl vc;
+  try {
+msg(0);
+    p = Manager.createPlayer("capture://video");
+//    p = Manager.createPlayer("capture://video?encoding=png");
+//    capture://video?encoding=gray8&width=160&height=120
+msg(1);
+    p.realize();
+msg(2);
+    vc = (VideoControl)p.getControl("VideoControl");
+msg(3);
+    if (vc != null) {
+      vc.initDisplayMode(VideoControl.USE_GUI_PRIMITIVE, null);
+msg(4);
+      p.start();
+msg(5);
+//      byte[] image = vc.getSnapshot("encoding=image/jpeg");
+      byte[] image = vc.getSnapshot("encoding=image/png");
+msg(6);
+      p.stop();
+msg(7);
+msg("done "+image.length);
+      return Image.createImage(image, 0, image.length);
+    }
+  } catch (Exception e) {
+    msg(e.toString());
+  }
+  return null;
+}
+#end
+
+#endif // __CAMERA_JPL__

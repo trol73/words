@@ -1,0 +1,657 @@
+#ifnotdef __SOUND_JPL__
+#define   __SOUND_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.0.                        //
+//                        Runtime libraries: SOUND.JPL                        //
+//                      Copyright (c) Trifonow O.A., 2004                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 8 types):                                        //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720                                      //
+//                                                                            //
+//    SonyEricsson  T610, K700                                                //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       S55, CX65                                                 //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+//----------------------------------------------------------------------------//
+//                 библиотека использует следующие идентификаторы             //
+//----------------------------------------------------------------------------//
+// УСТРОЙСТВА
+  MOTOROLA_V300        // - телефоны Motorola V300/V400/V500
+  MOTOROLA_T720        // - телефон Motorola  T720
+  SONYERICSSON_T610    // - телефон SonyEricsson T610
+  SONYERICSSON_K700    // - телефон SonyEricsson K700
+  NOKIA_SERIES_40      // - стандартные телефоны Nokia series 40
+  NOKIA_SERIES_60      // - стандартные телефоны Nokia series 60
+  SAMSUNG_E700         // - Samsung E700
+  SAMSUNG_X600         // - Samsung X600
+  SIEMENS_55           // - Siemens S(C, M)55
+  SIEMENS_65
+
+// ОБЩИЕ ОПРЕДЕЛЕНИЯ
+  MIDP_1               // - версия MIDP 1.0
+  MIDP_2               // - версия MIDP 2.0
+  DEBUG                // - отладочная версия
+
+// МАКСИМАЛЬНОЕ КОЛИЧЕСТВО ПРОИГРЫВАЕМЫХ ЗВУКОВЫХ ФАЙЛОВ
+  MAX_SOUND_FILES
+
+#ifnotdef MAX_SOUND_FILES
+  #define   MAX_SOUND_FILES          10
+#endif
+//----------------------------------------------------------------------------//
+//                           переменные звукового интерфейса                  //
+//----------------------------------------------------------------------------//
+
+// массив аудиопроигрывателей. он нужен для того, чтобы автоматически останавливать
+// воспроизведение звука и освобождать ресурс при воспроизведении следующего звука
+#defineblock end
+  #ifnotdef NOT_SOUND
+    #var
+public static SOUND[] sounds = null; // массив аудиопроигрывателей
+    #end
+
+// для того, чтобы вручную не отслеживать, какой звук воспроизводился последний раз,
+// будем хранить его индекс в переменной
+    #var
+public static int played_sound = -1;  // индекс проигрываемого (проигранного) звука, или -1, если все проигрыватели были закрыты
+    #end
+  #endif
+
+  #ifdef  NOKIA_SERIES_60
+    #var
+public static boolean soundPresent = false; // Флаг того, что данная модель телефона поддерживает звук
+    #end
+  #elseif NOKIA_SERIES_40
+    #var
+public static boolean soundPresent = false; // Флаг того, что данная модель телефона поддерживает звук
+    #end
+  #endif
+  #var
+public static boolean soundEnabled = true;  // флаг включенности звука
+  #end
+#endif
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                           функции звукового интерфейса                     //
+//----------------------------------------------------------------------------//
+
+//   void soundCreate(int index, String filename, int loop)
+// загружает звук из файла filename и присваивает ему индекс index. loop задает
+// количество проигрываний звука (или SOUND_LOOP_INF для зацикливания) для устройств,
+// поддерживающих этот параметр
+#ifnotdef NOT_SOUND
+#macro soundCreate(index, filename, loop)
+ #ifdef NOKIA
+  if (soundPresent && (sounds == null))
+    sounds = new SOUND[MAX_SOUND_FILES];
+ #else
+  if (sounds == null)
+    sounds = new SOUND[MAX_SOUND_FILES];
+ #endif
+  #ifdef    MOTOROLA_V300
+try {
+  sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+  sounds[index].realize();
+  sounds[index].setLoopCount(loop);
+    #ifdef    DEBUG
+} catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString());
+} catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+} catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+  #elseif   SONYERICSSON_T610
+try {
+  sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+  sounds[index].setLoopCount(loop);
+    #ifdef    DEBUG
+} catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString());
+} catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+} catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+  #elseif   SONYERICSSON_K700
+try {
+  sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+  sounds[index].setLoopCount(loop);
+    #ifdef    DEBUG
+} catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString());
+} catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+} catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+  #elseif   NOKIA_SERIES_40
+if (soundPresent)
+  try {
+    sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+    sounds[index].setLoopCount(loop);
+    sounds[index].realize();
+    #ifdef    DEBUG
+  } catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString());
+  } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+  } catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+  #elseif   NOKIA_SERIES_60
+if (soundPresent)
+  try {
+    sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+    sounds[index].realize();
+    #ifdef    DEBUG
+  } catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString()); }
+    catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+  } catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+  #elseif   SAMSUNG_E700
+    #ifdef    DEBUG
+try { sounds[index] = new AudioClip(1, filename); } catch (Exception e) { System.out.println(">> FATAL ERROR! >> createSound() -> " + e.toString()); }
+    #else
+try { sounds[index] = new AudioClip(1, filename); } catch (Exception e) { }
+    #endif
+  #elseif   SAMSUNG_X600
+    #ifdef    DEBUG
+try { sounds[index] = new AudioClip(1, filename); } catch (Exception e) { System.out.println(">> FATAL ERROR! >> createSound() -> " + e.toString()); }
+    #else
+try { sounds[index] = new AudioClip(1, filename); } catch (Exception e) { }
+    #endif
+  #elseif   SIEMENS_55
+try {
+  sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/x-mid");
+  sounds[index].realize();
+    #ifdef    DEBUG
+} catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString()); }
+  catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+} catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+
+  #elseif    SIEMENS_65
+try {
+  sounds[index] = Manager.createPlayer(this.getClass().getResourceAsStream(filename), "audio/midi");
+  sounds[index].realize();
+  sounds[index].setLoopCount(loop);
+    #ifdef    DEBUG
+} catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> createSound() -> " + ioe.toString());
+} catch (MediaException me) { System.out.println(">> FATAL ERROR! >> createSound() -> " + me.toString()); }
+    #else
+} catch (IOException ioe) { } catch (MediaException me) { }
+    #endif
+
+
+
+  #endif
+#endmacro
+#else
+#macro soundCreate(index, filename, loop)
+#endmacro
+#endif
+//------------------------------------------------------------------------------
+//   void soundStop()
+// прекращает проигрывание звука
+#macro soundStop()
+  #ifdef    MOTOROLA_V300
+if (played_sound >= 0) {
+  bool except = false;         // не удалось остановить звук
+    #ifdef    DEBUG
+  try { sounds[played_sound].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); except = true; }
+    #else
+  try { sounds[played_sound].stop(); } catch (MediaException me) { except = true; }
+    #endif
+  sounds[played_sound].deallocate();
+  if (!except)  played_sound = -1;
+}
+  #elseif   SONYERICSSON_T610
+if (played_sound >= 0) {
+    #ifdef    DEBUG
+  try { sounds[played_sound].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); }
+    #else
+  try { sounds[played_sound].stop(); } catch (MediaException me) { }
+    #endif
+  played_sound = -1;
+}
+  #elseif   SONYERICSSON_K700
+if (played_sound >= 0) {
+    #ifdef    DEBUG
+  try { sounds[played_sound].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); }
+    #else
+  try { sounds[played_sound].stop(); } catch (MediaException me) { }
+    #endif
+  played_sound = -1;
+}
+  #elseif   NOKIA_SERIES_40
+if (played_sound >= 0) {
+  sounds[played_sound].deallocate();
+  played_sound = -1;
+}
+  #elseif   NOKIA_SERIES_60
+if (played_sound >= 0) {
+  try {
+//    if (sounds[played_sound].getState() == Player.STARTED)
+      sounds[played_sound].stop();
+    #ifdef    DEBUG
+  } catch (Exception e) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + e.toString()); }
+    #else
+  } catch (Exception e) { }
+    #endif
+  played_sound = -1;
+}
+  #elseif   SAMSUNG_E700
+if (played_sound >= 0) {
+  try {
+    sounds[played_sound].stop();
+    #ifdef    DEBUG
+  } catch (IllegalStateException eis) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + eis.toString()); }
+    #else
+  } catch (IllegalStateException eis) { }
+    #endif
+  played_sound = -1;
+}
+  #elseif   SAMSUNG_X600
+if (played_sound >= 0) {
+  try {
+    sounds[played_sound].stop();
+    #ifdef    DEBUG
+  } catch (IllegalStateException eis) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + eis.toString()); }
+    #else
+  } catch (IllegalStateException eis) { }
+    #endif
+  played_sound = -1;
+}
+  #elseif   SIEMENS_55
+if (played_sound >= 0) {
+  try {
+    sounds[played_sound].stop();
+    #ifdef    DEBUG
+  } catch (Exception e) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + e.toString()); }
+    #else
+  } catch (Exception e) { }
+    #endif
+  played_sound = -1;
+}
+
+  #elseif    SIEMENS_65
+if (played_sound >= 0) {
+  bool except = false;         // не удалось остановить звук
+    #ifdef    DEBUG
+  try { sounds[played_sound].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); except = true; }
+    #else
+  try { sounds[played_sound].stop(); } catch (MediaException me) { except = true; }
+    #endif
+//  sounds[played_sound].deallocate();
+  if (!except)  played_sound = -1;
+}
+
+
+  #endif    // устройства
+#endmacro
+//------------------------------------------------------------------------------
+#defineblock end
+  #ifnotdef NOT_SOUND
+    #func
+//------------------------------------------------------------------------------
+public static final void playSound(int index, int loop) {
+// стартует воспроизведения звука с номером index, loop раз
+  #ifdef    MOTOROLA_V300
+  stopSound(); // прекращаем проигрывание последнего воспроизводимого звука
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   SONYERICSSON_T610
+  stopSound(); // прекращаем проигрывание всех других звуков
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  sleep(100);
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   NOKIA_SERIES_40
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if ((soundPresent) && (soundEnabled))
+    try {
+      if (sounds[index].getState() != Player.PREFETCHED)   sounds[index].prefetch();
+      sounds[index].setMediaTime(0L);
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (Exception e) { System.out.println(">> ERROR! >> playSound("+index+") -> " + e.toString()); }
+    #else
+    } catch (Exception e) { }
+    #endif
+  #elseif   SONYERICSSON_T610
+  stopSound(); // прекращаем проигрывание всех других звуков
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  sleep(100);
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   SONYERICSSON_K700
+  stopSound(); // прекращаем проигрывание всех других звуков
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//  sleep(100);
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   NOKIA_SERIES_40
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if ((soundPresent) && (soundEnabled))
+    try {
+      if (sounds[index].getState() != Player.PREFETCHED)   sounds[index].prefetch();
+      sounds[index].setMediaTime(0L);
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (Exception e) { System.out.println(">> ERROR! >> playSound("+index+") -> " + e.toString()); }
+    #else
+    } catch (Exception e) { }
+    #endif
+  #elseif   NOKIA_SERIES_60
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if ((soundPresent) && (soundEnabled))
+    try {
+      if (sounds[index].getState() != Player.PREFETCHED)  sounds[index].prefetch();
+      sounds[index].setLoopCount(loop);
+      sounds[index].setMediaTime(0L);
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (Exception e) { System.out.println(">> ERROR! >> playSound("+index+") -> " + e.toString()); }
+    #else
+    } catch (Exception e) { }
+    #endif
+  #elseif   SAMSUNG_E700
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].play(loop, 5);
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (IllegalArgumentException eia) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eia.toString());
+    } catch (IllegalStateException eis) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eis.toString()); }
+    #else
+    } catch (IllegalArgumentException eia) { } catch (IllegalStateException eis) { }
+    #endif
+  #elseif   SAMSUNG_X600
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].play(loop, 5);
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (IllegalArgumentException eia) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eia.toString());
+    } catch (IllegalStateException eis) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eis.toString()); }
+    #else
+    } catch (IllegalArgumentException eia) { } catch (IllegalStateException eis) { }
+    #endif
+  #elseif   SIEMENS_55
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].setLoopCount(loop);
+      if (sounds[index].getState() != Player.PREFETCHED)  sounds[index].prefetch();
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//if (1 != 1)
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+
+  #elseif    SIEMENS_65
+  stopSound(); // прекращаем проигрывание последнего воспроизводимого звука
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+
+
+
+
+  #endif
+}
+//-----------------------------------------------------------------------------
+    #end
+  #endif
+  #ifnotdef NOT_SOUND
+    #func
+public static final void playSoundAgain(int index, int loop) {
+// стартует воспроизведения звука с номером index, loop раз
+// отличается от playSound() тем, что не переиннициализирует звук, если до этого
+// проигрывался он же. Используется для повторного воспроизведения одного и того же звука
+  bool fastPlay = false; // быстрое воспроизведение без переиннициализации
+  #ifdef    MOTOROLA_V300
+  if (index == played_sound) { // если до этого уже проигрывался данный звук, т.е., он уже подготовлен
+    fastPlay = true;
+    #ifdef DEBUG
+    try { sounds[index].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); }
+    #else
+    try { sounds[index].stop(); } catch (MediaException me) {  }
+    #endif
+  } else
+  stopSound(); // прекращаем проигрывание последнего воспроизводимого звука
+  if (soundEnabled)
+    try {
+      if (!fastPlay)  sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   SONYERICSSON_T610
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+  #elseif   NOKIA_SERIES_40
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if ((soundPresent) && (soundEnabled))
+    try {
+      if (sounds[index].getState() != Player.PREFETCHED)   sounds[index].prefetch();
+      sounds[index].setMediaTime(0L);
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (Exception e) { System.out.println(">> ERROR! >> playSound("+index+") -> " + e.toString()); }
+    #else
+    } catch (Exception e) { }
+    #endif
+  #elseif   NOKIA_SERIES_60
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if ((soundPresent) && (soundEnabled))
+    try {
+      if (sounds[index].getState() != Player.PREFETCHED)  sounds[index].prefetch();
+      sounds[index].setLoopCount(loop);
+      sounds[index].setMediaTime(0L);
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (Exception e) { System.out.println(">> ERROR! >> playSound("+index+") -> " + e.toString()); }
+    #else
+    } catch (Exception e) { }
+    #endif
+  #elseif   SAMSUNG_E700
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].play(loop, 5);
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (IllegalArgumentException eia) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eia.toString());
+    } catch (IllegalStateException eis) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eis.toString()); }
+    #else
+    } catch (IllegalArgumentException eia) { } catch (IllegalStateException eis) { }
+    #endif
+  #elseif   SAMSUNG_X600
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].play(loop, 5);
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (IllegalArgumentException eia) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eia.toString());
+    } catch (IllegalStateException eis) { System.out.println(">> ERROR! >> playSound("+index+") -> " + eis.toString()); }
+    #else
+    } catch (IllegalArgumentException eia) { } catch (IllegalStateException eis) { }
+    #endif
+  #elseif   SIEMENS_55
+  stopSound(); // прекращаем проигрывание всех других звуков
+  if (soundEnabled)
+    try {
+      sounds[index].setLoopCount(loop);
+      if (sounds[index].getState() != Player.PREFETCHED)  sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+      } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+      } catch (MediaException me) { }
+    #endif
+
+  #elseif    SIEMENS_65
+  if (index == played_sound) { // если до этого уже проигрывался данный звук, т.е., он уже подготовлен
+    fastPlay = true;
+    #ifdef DEBUG
+    try { sounds[index].stop(); } catch (MediaException me) { System.out.println(">> FATAL ERROR! >> stopSound("+played_sound+") -> " + me.toString()); }
+    #else
+    try { sounds[index].stop(); } catch (MediaException me) {  }
+    #endif
+  } else
+  stopSound(); // прекращаем проигрывание последнего воспроизводимого звука
+  if (soundEnabled)
+    try {
+      if (!fastPlay)  sounds[index].prefetch();
+      sounds[index].start();
+      played_sound = index;
+    #ifdef    DEBUG
+    } catch (MediaException me) { System.out.println(">> ERROR! >> playSound("+index+") -> " + me.toString()); }
+    #else
+    } catch (MediaException me) { }
+    #endif
+
+  #endif
+}
+//-----------------------------------------------------------------------------
+    #end
+  #endif
+#ifnotdef NOT_SOUND
+  #func
+public static final void stopSound() {
+// прекращает проигрывание звука
+  soundStop()
+}
+//-----------------------------------------------------------------------------
+  #end
+#endif
+#defineblock begin
+//------------------------------------------------------------------------------
+//   void detectSound()
+// устанавливает значение переменной soundPresent
+#macro detectSound()
+  #ifdef NOKIA_SERIES_60
+
+// детектим модель
+String model = (System.getProperty("microedition.platform"));
+if ((model != null) && (model.length() >= 9)) {
+    #ifdef DEBUG
+System.out.println("Device model = " + model);
+    #endif
+  if   (model.substring(5, 9).compareTo("7650") == 0) soundPresent = false;
+  else soundPresent = true;
+} else soundPresent = false;
+    #ifdef DEBUG
+      soundPresent = true;
+    #endif
+  #elseif NOKIA_SERIES_40
+// детектим модель
+String model = (System.getProperty("microedition.platform"));
+if ((model != null) && (model.length() >= 9)) {
+    #ifdef DEBUG
+System.out.println("Device model = " + model);
+    #endif
+  if   (model.substring(5, 9).compareTo("3220") == 0) soundPresent = true;
+  else if (model.substring(5, 9).compareTo("5140") == 0) soundPresent = true;
+  else if (model.substring(5, 9).compareTo("6170") == 0) soundPresent = true;
+  else if (model.substring(5, 9).compareTo("6230") == 0) soundPresent = true;
+  else if (model.substring(5, 9).compareTo("6255") == 0) soundPresent = true;
+  else if (model.substring(5, 9).compareTo("7600") == 0) soundPresent = true;
+  else if ((model.substring(5, 9).compareTo("3300") == 0) && (Runtime.getRuntime().totalMemory()) >= 300*1024) soundPresent = true;
+  else soundPresent = false;
+} else soundPresent = false;
+  #endif
+#endmacro
+
+
+
+// тут заглушки для устройств, не поддерживающих звук
+  #ifdef NOT_SOUND
+     #macro playSound(index, loop)
+     #endmacro
+
+    #macro stopSound()
+    #endmacro
+  #endif                         // NOT_SOUND
+#defineblock end
+#endif                              // _SOUND_H_
+
+

@@ -1,0 +1,76 @@
+#ifnotdef __SYSTEM_JPL__
+#define   __SYSTEM_JPL__
+#defineblock begin
+/*----------------------------------------------------------------------------*\
+
+                            Trol Mobile Studio v 1.0
+                          Runtime libraries:  SYSTEM.H
+
+                     Copyright (c) Trifonow O.A., 2004-2006
+                                 Version 1.0
+
+
+   Определяет базовые функции.
+
+   Поддерживаемые типы приложений:
+       J2ME (midlet)
+       J2SE (applet, application)
+       BLACKBERRY (cod, jar)
+       WIN32
+
+   Определяет макрофункции:
+     void sleep(long ms)
+     void wait()
+     void quit()
+     void setFullScreen(bool full=true)
+     void repaint()
+     long time()
+     long time(long start)
+     long freeMem()
+     void gc()
+
+
+   Автофункции:
+     int random(int n)
+
+
+\*----------------------------------------------------------------------------*/
+
+//----------------------------------------------------------------------------//
+//                           макрофункции библиотеки                          //
+//----------------------------------------------------------------------------//
+// Эта макрофункция возвращает полученный аргумент
+// Ее можно использовать в других макрофункциях для обращению к полю или методу
+// объекта-аргумента
+// #macro strlen(aStr)
+//   void_macro(aStr).length()
+// #endmacro
+#macro void_macro(param)
+param
+#endmacro
+
+
+#ifdef JAVA
+  #include "rtl/java/system.h"
+#endif // JAVA
+
+#defineblock end
+#ifdef JAVA
+#var
+public static java.util.Random rnd = new java.util.Random(); // объект генератора случайных чисел
+#end
+#func
+public static final int random(int n) {
+// генерация случайного числа в диапазоне [0..n)
+  if (n <= 0)
+    return 0;
+  int r = void_macro(rnd).nextInt();
+  if (r < 0)
+    r = -r;
+  return (r % n);
+}
+#end
+#endif // JAVA
+#endif // __SYSTEM_JPL__
+
+

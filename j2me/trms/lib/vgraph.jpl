@@ -1,0 +1,72 @@
+#ifnotdef __VGRAPH_JPL__
+#define   __VGRAPH_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.0.                        //
+//                        Runtime libraries:  VGRAPH.JPL                      //
+//                      Copyright (c) Trifonow O.A., 2005                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 8 types):                                        //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720                                      //
+//                                                                            //
+//    SonyEricsson  T610                                                      //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       S55                                                       //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+//------------------------------------------------------------------------------
+//  БИБЛИОТЕКА ПОДДЕРЖКИ ВЕКТОРНОЙ ГРАФИКИ И РАБОТЫ С ГРАФИЧЕСКИМИ ПРИМИТИВАМИ
+//------------------------------------------------------------------------------
+#defineblock end
+#func
+public static final void drawRectArea(Graphics g, int x, int y, int w, int h, int cBack, int cFrame, int cUL, int cDR) {
+// Рисует прямоугольную область (x, y, w, h) цвета cBack, обведенную рамкой
+// (лежащей в этой области) цвета cFrame. Внутири этой рамки есть вторая рамка:
+// ее левая и верхняя линия рисуется цветом cUL, а нижняя и правая - cDR.
+//   111111111111
+//   122222222221
+//   12        31
+//   12        31
+//   12        31
+//   123333333331
+//   111111111111
+  setClip(x, y, w, h);
+  setColor(cFrame);
+  drawRect(x, y, --w, --h);
+  setColor(cBack);
+  fillRect(x+2, y+2, --w-2, --h-2);
+  setClip(x+1, y+1, w, h);
+  setColor(cUL);
+  drawRect(x+1, y+1, w, h);
+  setColor(cDR);
+  drawRect(x, y, w, h);
+}
+#end
+//------------------------------------------------------------------------------
+#func
+public static final void drawRectAreaMatrix(Graphics g, int n, int m, bool first, int x, int y, int w, int h, int cBack, int cFrame, int cUL, int cDR) {
+// Рисует в шахматном порядке матрицу (n x m) областей drawRectArea(). Элемент (0, 0) этой
+// матрицы содержит область drawRectArea() если first = true. Далее области рисуются через одну.
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      if (first)  drawRectArea(g, x+i*w, y+j*h, w, h, cBack, cFrame, cUL, cDR);
+      first = !first;
+    }
+    first = !first;
+  }
+}
+#end
+//------------------------------------------------------------------------------

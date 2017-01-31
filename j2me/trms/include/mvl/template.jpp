@@ -1,0 +1,24 @@
+#include "defines.h"
+
+_MVL_APP_HEADER_(app, class);
+
+#include "mvl/system.h"
+#include "mvl/app.h"
+#include "mvl/events.h"
+
+
+// файлы проекта
+#include "vars.h"
+#include "init.h"
+#include "events.h"
+#include "run.h"
+#include "draw.h"
+
+// системные библиотеки
+#uselibrary "mvl/system.jpl"
+#uselibrary "mvl/graph.jpl"
+#uselibrary "mvl/files.jpl"
+#uselibrary "mvl/fonts.jpl"
+
+
+_MVL__APP_BODY_(app, class)

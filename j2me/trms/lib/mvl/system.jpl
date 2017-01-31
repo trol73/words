@@ -1,0 +1,31 @@
+#ifnotdef __MVL_SYSTEM_JPL__
+#define   __MVL_SYSTEM_JPL__
+#defineblock begin
+
+/*----------------------------------------------------------------------------*\
+
+                             Tr Mobile Studio v 1.0
+                            Moblie Visual Libraries
+
+                               Base system functions
+
+
+                      Copyright (c) Trifonow O.A., 2007
+                                 Version 1.0
+
+\*----------------------------------------------------------------------------*/
+
+
+#defineblock end
+#ifdef JAVA
+#func
+public static final void sleep(TTime t) {
+  try {
+    Thread.sleep(t);
+  } catch ( Exception ex ) {
+  }
+}
+#end
+#endif // JAVA
+#endif // __MVL_SYSTEM_JPL__
+

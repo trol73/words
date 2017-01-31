@@ -1,0 +1,239 @@
+#ifnotdef __FILES_JPL__
+#define   __FILES_JPL__
+#defineblock begin
+//----------------------------------------------------------------------------//
+//                       Tr Java Mobile Builder v 1.0.                        //
+//                        Runtime libraries:  FILES.JPL                       //
+//                      Copyright (c) Trifonow O.A., 2004                     //
+//                                Version 1.0                                 //
+//                                                                            //
+//  Defines:                                                                  //
+//  Macroses:                                                                 //
+//  Functions:                                                                //
+//  Variables:                                                                //
+//                                                                            //
+//                                                                            //
+//  Supported devices (total 8 types):                                        //
+//                                                                            //
+//    Motorola      V300/V400/V500, T720                                      //
+//                                                                            //
+//    SonyEricsson  T610                                                      //
+//                                                                            //
+//    Nokia         Series 40, Series 60                                      //
+//                                                                            //
+//    Samsung       E700, X600                                                //
+//                                                                            //
+//    Siemens       S55                                                       //
+//                                                                            //
+//----------------------------------------------------------------------------//
+
+
+
+//----------------------------------------------------------------------------
+//   void openFile(FILE file, String filename)
+// создает объявления дескриптора файла file и ассоциирует его с файлом
+// filename
+#macro openFile(file, filename)
+#ifnotdef  __INPUT__STREAM__CREATED__
+#define    __INPUT__STREAM__CREATED__
+InputStream is = null;
+#else
+is = null;
+#endif
+is = instance.getClass().getResourceAsStream(filename);
+#ifdef DEBUG
+if (is == null) System.out.println(">> FATAL ERROR! >> openFile("+filename+") -> file open error");
+#endif
+Reader file = new InputStreamReader(is)
+#endmacro
+//------------------------------------------------------------------------------
+//   void closeFile(FILE file)
+// закрывает файл FILE и освобождает его дескриптор
+#macro closeFile(file)
+#ifdef DEBUG
+try { file.close() } catch (IOException e) { System.out.println(">> FATAL ERROR! >> closeFile("+file+") -> " + e.toString()) }
+#else
+try { file.close() } catch (IOException e) { }
+#endif
+is = null;
+file = null
+#endmacro
+//------------------------------------------------------------------------------
+//   void fReadByte(FILE file, byte val)
+// читает байт из файла. результат в переменную val помещает htpekmnfn или -1,
+// если достигнут конец файла
+#macro fReadByte(file, val)
+#ifdef DEBUG
+try { val = file.read() } catch (IOException e) { System.out.println(">> FATAL ERROR! >> fReadByte("+file+") -> " + e.toString()) }
+#else
+try { val = file.read() } catch (IOException e) { }
+#endif
+#endmacro
+//------------------------------------------------------------------------------
+//   void fReadBuf(FILE file, char[] buf)
+// читает содержимое файла с текущей позиции до его конца в buf[]
+#macro fReadBuf(file, buf)
+#ifdef DEBUG
+try { file.read(buf) } catch (IOException e) { System.out.println(">> FATAL ERROR! >> fReadBuf("+file+") -> " + e.toString()) }
+#else
+try { file.read(buf) } catch (IOException e) { }
+#endif
+#endmacro
+//------------------------------------------------------------------------------
+//   void fSkip(long n)
+// перемещает указатель на n символов вперед
+#macro fSkip(n)
+#ifdef DEBUG
+try { file.skip(n) } catch (IOException e) { System.out.println(">> FATAL ERROR! >> fSkip("+file+") -> " + e.toString()) }
+#else
+try { file.skip(n) } catch (IOException e) { }
+#endif
+#endmacro
+//------------------------------------------------------------------------------
+//   void fReset()
+// сбрасывает файл и перемещает указатель на его начало
+#macro fReset()
+#ifdef DEBUG
+try { file.reset() } catch (IOException e) { System.out.println(">> FATAL ERROR! >> fReset("+file+") -> " + e.toString()) }
+#else
+try { file.reset() } catch (IOException e) { }
+#endif
+#endmacro
+//------------------------------------------------------------------------------
+//   void fSeek(long n)
+// перемещает указатель на n-й символ от начала файла
+#macro fSeek(n)
+#ifdef DEBUG
+try { file.reset(); file.skip(n) } catch (IOException e) { System.out.println(">> FATAL ERROR! >> fSeek("+file+") -> " + e.toString()) }
+#else
+try { file.reset(); file.skip(n) } catch (IOException e) { }
+#endif
+#endmacro
+//------------------------------------------------------------------------------
+//   boolean fReadString(Reader file, String str)
+// читает текстовую строку из файла. Возвращает false если достигнут конец файла
+#defineblock end
+#func
+public static final boolean fReadString(Reader file, String str) {
+  str = "";
+  while (true) {
+    try {
+      int r = file.read();
+      if (r == -1) return false;
+      if (r == 13) break;
+      else {
+        char ch = (char)(r);
+        if (ch != 10) s += ch;
+      }
+#ifnotdef DEBUG
+    } catch (IOException ioe) {};
+#else
+    } catch (IOException ioe) { System.out.println(">> FATAL ERROR! >> fReadString("+file+") -> " + ioe.toString()) };
+#endif
+  }
+  return true;
+}
+#end
+//#defineblock begin
+
+
+
+#endif
+#defineblock begin
+// ИННИЦИАЛИЗАЦИЯ СТРОКОВЫХ ДАННЫХ...
+        String[] temp_array = new String[MAX_TEXT_LENGTH];  // буферный массив
+
+
+        lines_help_count = readArray(reader, temp_array);
+        lines_help = new String[lines_help_count];
+        for (int i = lines_help_count-1; i >= 0; i--)
+          lines_help[i] = temp_array[i];
+//---------------------------------------------------------------------------
+// Чтение строки из файла ресурсов
+  public static final int readArray(Reader reader, String[] temp_array) {
+    int temp_array_n = -1;
+    EOF = false; // тут я использую эту переменную как флаг EOF
+    while (!EOF) {
+      temp_array_n ++;
+      temp_array[temp_array_n] = readString(reader);
+      if (temp_array[temp_array_n].length() == 1) break;
+    };
+    return temp_array_n;
+  }
+//-----------------------------------------------------------------------------
+#defineblock end
+#func
+public static final String fReadText(String filename) {
+// Возвращает прочитанный текст из файла filename как строку
+  InputStream is = null;
+  is = instance.getClass().getResourceAsStream(filename);
+#ifdef DEBUG
+  if (is == null) System.out.println(">> FATAL ERROR! >> fReadText("+filename+") -> file open error");
+#endif
+  Reader file = new InputStreamReader(is);
+  StringBuffer str = new StringBuffer();
+  try {
+    do {
+      int i = file.read();
+      if (i == -1)  break;
+      str.append((char)(i));
+    } while(true);
+#ifdef DEBUG
+  } catch(Exception ex) { System.out.println(">> FATAL ERROR! >> fReadText("+filename+") -> file read error"); }
+#else
+  } catch(Exception ex) { }
+#endif
+  file = null;
+  is = null;
+  return (str.toString());
+}
+//-----------------------------------------------------------------------------
+#end
+#defineblock begin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+InputStream in = null;
+DataInputStream inReader = null;
+try {
+  in = this.getClass().getResourceAsStream(filename);
+  if (in == null) { !ERROR! }
+  inReader = new DataInputStream (in);
+  key = inReader.readUTF();
+} catch (EOFException ex) {
+} catch (Exception ex) { }
+
+
+    } finally {
+      if (inReader != null) {
+        try {
+          inReader.close();  // close DataInputStream
+        } catch (IOException ex) {  }
+      }
+      if (in != null) {
+        try {
+          in.close();  // close InputStream
+        } catch (IOException ex) {  }
+      }
+    }
+#defineblock end
+

@@ -1,0 +1,46 @@
+/******************************************************************************\
+                             MobileStudio Project
+
+                                 Words
+
+                         Copyright (c) Trifonow Oleg
+
+
+    Started:   07.03.2008  20:26:41
+    Completed:
+
+\******************************************************************************/
+#include "defines.h"
+#include "colors.h"
+
+#include "mvl/stddefs.h"
+#include "mvl/app.h"
+#include "mvl/base.h"
+
+_MVL_APP_HEADER_(words, Words)
+
+// системные библиотеки
+#include "mvl/events.h"
+#include "mvl/system.h"
+#include "mvl/strings.h"
+#include "mvl/graph.h"
+#include "mvl/fileio.h"
+
+#ifdef ENABLE_GUI
+#include "mvl/ui/ui.h"
+#endif // ENABLE_GUI
+
+#include "mvltools/gui.h"
+#include "mvltools/messagebox.h"
+
+// файлы проекта
+#include "vars.h"
+#include "init.h"
+#include "events.h"
+#include "run.h"
+#include "draw.h"
+#include "gui.h"
+#include "words.h"
+
+
+_MVL_APP_BODY_(words, Words)
